@@ -8,7 +8,6 @@ pygame.init()
 screen_x_size = 1200
 screen_y_size = 600
 
-
 playlist = ['fast_cut.mp3', 'turtle.mp3']
 pygame.mixer.music.load('slow_cut.mp3')
 pygame.mixer.music.set_endevent(pygame.USEREVENT)
@@ -32,10 +31,13 @@ COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
 
 
 greeting_font = pygame.font.SysFont('arial', 36)
-greeting_text = greeting_font.render("У Вас будет 50 секунд на игру. " +
-                                     "Нажмите пробел, чтобы начать", 0, WHITE)
-screen.blit(greeting_text, (screen_x_size / 2 - greeting_text.get_width() / 2,
-                            screen_y_size / 2 - greeting_text.get_height() / 2))
+greeting_text_1 = greeting_font.render("У Вас будет 50 секунд на игру. " +
+                                     "Введите Ваше имя", 0, WHITE)
+greeting_text_2 = greeting_font.render("и нажмите пробел, чтобы продолжить", 0, WHITE)
+screen.blit(greeting_text_1, (screen_x_size / 2 - greeting_text_1.get_width() / 2,
+                            screen_y_size / 2 - greeting_text_1.get_height() / 2))
+screen.blit(greeting_text_2, (screen_x_size / 2 - greeting_text_2.get_width() / 2,
+                            screen_y_size / 2 + greeting_text_1.get_height() / 2))
 
 
 def new_ball():
@@ -217,6 +219,8 @@ def game():
 
 
 def opening():
+    global name
+    name = ''
     pygame.display.update()
     clock = pygame.time.Clock()
     finished = False
@@ -226,16 +230,38 @@ def opening():
             if event.type == pygame.QUIT:
                 finished = True
                 pygame.quit()
-            elif event.type == pygame.KEYDOWN and event.key == K_SPACE:
-                finished = True
-
+            elif event.type == pygame.KEYDOWN:
+                if event.key == K_SPACE:
+                    finished = True
+                elif event.unicode == '\b':
+                    name = name[:-1]
+                    greeting_text_3 = greeting_font.render(name, 0, GREEN)
+                    screen.fill(BLACK)
+                    screen.blit(greeting_text_3, (screen_x_size / 2 - greeting_text_3.get_width() / 2,
+                                                  greeting_text_3.get_height() / 2))
+                    screen.blit(greeting_text_1, (screen_x_size / 2 - greeting_text_1.get_width() / 2,
+                                                  screen_y_size / 2 - greeting_text_1.get_height() / 2))
+                    screen.blit(greeting_text_2, (screen_x_size / 2 - greeting_text_2.get_width() / 2,
+                                                  screen_y_size / 2 + greeting_text_1.get_height() / 2))
+                    pygame.display.update()
+                else:
+                    name += event.unicode
+                    greeting_text_3 = greeting_font.render(name, 0, GREEN)
+                    screen.fill(BLACK)
+                    screen.blit(greeting_text_3, (screen_x_size/2 - greeting_text_3.get_width()/2,
+                                                  greeting_text_3.get_height() / 2))
+                    screen.blit(greeting_text_1, (screen_x_size / 2 - greeting_text_1.get_width() / 2,
+                                                  screen_y_size / 2 - greeting_text_1.get_height() / 2))
+                    screen.blit(greeting_text_2, (screen_x_size / 2 - greeting_text_2.get_width() / 2,
+                                                  screen_y_size / 2 + greeting_text_1.get_height() / 2))
+                    pygame.display.update()
 
 def ending():
     pygame.mixer.music.load('slow.mp3')
     pygame.mixer.music.play()
     screen.fill(BLACK)
     if is_turtle_catched:
-        ending_text = greeting_font.render("Поздравляю!!! Вы поймали черепаху. " +
+        ending_text = greeting_font.render("Поздравляю!!! Вы поймали черепашку. " +
                                              "У Вас 1000000000 очков", 0, WHITE)
     else:
         ending_text = greeting_font.render("У Вас " + str(points) +
@@ -261,6 +287,11 @@ opening()
 
 game()
 
+file = open('results.txt', 'a')
+
 ending()
+
+file.write(name + ' ' + str(points) + '\n')
+file.close()
 
 pygame.quit()
