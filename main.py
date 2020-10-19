@@ -52,6 +52,7 @@ def new_ball():
 
 
 def change_ball(n):
+    '''Изменяет положение и цвет созданного и пойманного шарика '''
     v_x = randint(-max_speed, max_speed)
     v_y = randint(-max_speed, max_speed)
     x = randint(R_max, screen_x_size - R_max)
@@ -62,10 +63,12 @@ def change_ball(n):
 
 
 def draw_ball(color, x, y, r):
+    '''Прорисовывает шарик '''
     circle(screen, color, (x, y), r)
 
 
 def count_walls():
+    '''Расчёт ударов шариков о стенки '''
     for i in range(len(Balls)):
         if abs(Balls[i][0]) <= Balls[i][4]:
             Balls[i][2] = randint(max_speed//10, max_speed)
@@ -91,6 +94,7 @@ def count_walls():
 
 
 def game():
+    '''Собственного говоря, это цикл самой игры'''
     global R_max
     global R_min
     global max_speed
@@ -105,7 +109,6 @@ def game():
     Balls = []
 
     turtle_surf = pygame.image.load('turtle.jpeg')
-    # turtle_surf.set_colorkey(BLACK)
     turtle_x = 400
     turtle_y = 300
     turtle_x_speed = 0
@@ -144,7 +147,7 @@ def game():
                     pygame.mixer.music.load(playlist.pop())
                     pygame.mixer.music.play()
                     if len(playlist) == 1:
-                        pygame.mixer.music.set_volume(3)
+                        pygame.mixer.music.set_volume(100000)
                     elif len(playlist) == 0:
                         pygame.mixer.music.set_volume(0.7)
                         turtle_speed *= 2
@@ -219,6 +222,7 @@ def game():
 
 
 def opening():
+    '''Менюшка в самом начале '''
     global name
     name = ''
     pygame.display.update()
@@ -256,7 +260,9 @@ def opening():
                                                   screen_y_size / 2 + greeting_text_1.get_height() / 2))
                     pygame.display.update()
 
+
 def ending():
+    '''Конечная сцена '''
     pygame.mixer.music.load('slow.mp3')
     pygame.mixer.music.play()
     screen.fill(BLACK)
