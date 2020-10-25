@@ -24,8 +24,8 @@ def new_ball():
     """
     global x, y, r, color, v_x, v_y
     r = random.randint(30, 50)
-    x = random.randint(r, x_screen_size - r)
-    y = random.randint(r, y_screen_size - r)
+    x = random.randint(51, x_screen_size - 51)
+    y = random.randint(51, y_screen_size - 51)
     v_x = random.randint(-10, 10)
     v_y = random.randint(-10, 10)
     is_clicked = False
@@ -49,7 +49,7 @@ def boss_mob():
     v_y = random.randint(-20, 20)
 
     boss_image_surf = pygame.image.load('fly-1.png')
-
+    boss_image_surf.set_colorkey(BLACK)
     boss_image_surf_scale = pygame.transform.scale(boss_image_surf,
                                                    (boss_image_surf.get_width() // 5,
                                                    boss_image_surf.get_height() // 5)
@@ -108,10 +108,10 @@ def draw_balls_on_the_screen(surf, list):
     for i in range(len(list)):
         list[i][1][0] += list[i][3]
         list[i][1][1] += list[i][4]
-        if list[i][1][0] >= 1000 or list[i][1][0] <= 50:
-            list[i][3] *= -1
-        if list[i][1][1] >= 800 or list[i][1][1] <= 50:
-            list[i][4] *= -1
+        if list[i][1][0] >= x_screen_size-51 or list[i][1][0] <= 51:
+            list[i][3] *= -1 # Reverse peed, if ball goes away in x direction
+        if list[i][1][1] >= y_screen_size-51 or list[i][1][1] <= 51:
+            list[i][4] *= -1 # # Reverse peed, if ball goes away in y direction
         draw_ball(surf, list[i][0], list[i][1], list[i][2])
 
 
