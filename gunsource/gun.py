@@ -33,7 +33,7 @@ class ball():
                 self.y + self.r,
                 fill=self.color
         )
-        self.live = 30
+        self.live = 8
 
     def set_coords(self):
         canv.coords(
@@ -75,6 +75,15 @@ class ball():
             return True
         else:
             return False
+
+    def death(self):
+        canv.coords(
+            self.id,
+            -10,
+            -10,
+            -10,
+            -10
+        )
 
 
 class gun():
@@ -188,6 +197,10 @@ def mainloop():
                 canv.itemconfig(screen1, text='')
                 t1.new_target()
                 t1.live = 1
+            b.live -= z
+            if b.live <= 0:
+                balls.pop(0)
+                b.death()
         canv.update()
         time.sleep(z)
         g1.targetting()
