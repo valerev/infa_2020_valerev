@@ -51,9 +51,12 @@ class ball():
         self.x и self.y с учетом скоростей self.vx и self.vy, силы гравитации, действующей на мяч,
         и стен по краям окна (размер окна 800х600).
         """
-        g = 9.81
-        if self.y >= 600:
-            self.vy = -self.vy
+        g = 500
+        k = 0.8
+        if self.y >= 500:
+            self.y = 500
+            self.vy = -self.vy * k
+            self.vx = self.vx * k
         if self.x >= 800:
             self.vx = -self.vx
         self.vy += g * dt
@@ -93,8 +96,8 @@ class gun():
         new_ball = ball()
         new_ball.r += 5
         self.an = math.atan((event.y-new_ball.y) / (event.x-new_ball.x))
-        new_ball.vx = self.f2_power * math.cos(self.an)
-        new_ball.vy = - self.f2_power * math.sin(self.an)
+        new_ball.vx = 10 * self.f2_power * math.cos(self.an)
+        new_ball.vy = 10 * self.f2_power * math.sin(self.an)
         balls += [new_ball]
         self.f2_on = 0
         self.f2_power = 10
