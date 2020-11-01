@@ -77,13 +77,6 @@ class ball():
             return False
 
     def death(self):
-        # canv.coords(
-        #     self.id,
-        #     -10,
-        #     -10,
-        #     -10,
-        #     -10
-        # )
         canv.delete(self.id)
 
 
@@ -178,6 +171,7 @@ def new_game(event=''):
 
 
 def mainloop():
+    global bullet
     z = 0.03
     t1.live = 1
     while t1.live or balls:
@@ -194,12 +188,12 @@ def mainloop():
                         b.set_coords()
                     time.sleep(z)
                     canv.update()
-
+                bullet = 0
                 canv.itemconfig(screen1, text='')
                 t1.new_target()
                 t1.live = 1
             b.live -= z
-            if b.live <= 0:
+            if b.live <= 0 and b.vx <= 0.1:
                 balls.pop(0)
                 b.death()
         canv.update()
