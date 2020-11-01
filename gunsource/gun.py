@@ -77,13 +77,14 @@ class ball():
             return False
 
     def death(self):
-        canv.coords(
-            self.id,
-            -10,
-            -10,
-            -10,
-            -10
-        )
+        # canv.coords(
+        #     self.id,
+        #     -10,
+        #     -10,
+        #     -10,
+        #     -10
+        # )
+        canv.delete(self.id)
 
 
 class gun():
@@ -146,7 +147,7 @@ class target():
     def new_target(self):
         """ Инициализация новой цели. """
         x = self.x = rnd(600, 780)
-        y = self.y = rnd(300, 550)
+        y = self.y = rnd(300, 450)
         r = self.r = rnd(2, 50)
         color = self.color = 'red'
         canv.coords(self.id, x-r, y-r, x+r, y+r)
@@ -187,7 +188,7 @@ def mainloop():
                 t1.live = 0
                 t1.hit()
                 canv.itemconfig(screen1, text='Вы уничтожили цель за ' + str(bullet) + ' выстрелов')
-                for i in range(10):
+                for i in range(25):
                     for b in balls:
                         b.move(z)
                         b.set_coords()
