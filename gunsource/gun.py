@@ -23,7 +23,7 @@ class ball():
         self.x = x
         self.y = y
         self.r = 10
-        self.vx = 0
+        self.vx = 10
         self.vy = 0
         self.color = choice(['blue', 'green', 'red', 'brown'])
         self.id = canv.create_oval(
@@ -44,16 +44,21 @@ class ball():
                 self.y + self.r
         )
 
-    def move(self):
+    def move(self, dt):
         """Переместить мяч по прошествии единицы времени.
 
         Метод описывает перемещение мяча за один кадр перерисовки. То есть, обновляет значения
         self.x и self.y с учетом скоростей self.vx и self.vy, силы гравитации, действующей на мяч,
         и стен по краям окна (размер окна 800х600).
         """
-        # FIXME
-        self.x += self.vx
-        self.y -= self.vy
+        g = 9.81
+        if self.y >= 600:
+            self.vy = -self.vy
+        if self.x >= 800:
+            self.vx = -self.vx
+        self.vy += g * dt
+        self.x += self.vx * dt
+        self.y += self.vy * dt
 
     def hittest(self, obj):
         """Функция проверяет сталкивалкивается ли данный обьект с целью, описываемой в обьекте obj.
@@ -156,11 +161,14 @@ def new_game(event=''):
     canv.bind('<ButtonRelease-1>', g1.fire2_end)
     canv.bind('<Motion>', g1.targetting)
 
+
+def mainloop():
     z = 0.03
     t1.live = 1
     while t1.live or balls:
         for b in balls:
-            b.move()
+            b.move(z)
+            b.set_coords()
             if b.hittest(t1) and t1.live:
                 t1.live = 0
                 t1.hit()
