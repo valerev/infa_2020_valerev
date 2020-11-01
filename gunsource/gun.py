@@ -71,8 +71,10 @@ class ball():
         Returns:
             Возвращает True в случае столкновения мяча и цели. В противном случае возвращает False.
         """
-        # FIXME
-        return False
+        if (self.x - obj.x)**2 + (self.y - obj.y)**2 <= (self.r + obj.r)**2:
+            return True
+        else:
+            return False
 
 
 class gun():
@@ -80,7 +82,7 @@ class gun():
         self.f2_power = 10
         self.f2_on = 0
         self.an = 1
-        self.id = canv.create_line(20,450,50,420,width=7) # FIXME: don't know how to set it...
+        self.id = canv.create_line(20, 450, 50, 420, width=7) # FIXME: don't know how to set it...
 
     def fire2_start(self, event):
         self.f2_on = 1
@@ -175,11 +177,19 @@ def mainloop():
             if b.hittest(t1) and t1.live:
                 t1.live = 0
                 t1.hit()
-                canv.bind('<Button-1>', '')
-                canv.bind('<ButtonRelease-1>', '')
                 canv.itemconfig(screen1, text='Вы уничтожили цель за ' + str(bullet) + ' выстрелов')
+                for i in range(10):
+                    for b in balls:
+                        b.move(z)
+                        b.set_coords()
+                    time.sleep(z)
+                    canv.update()
+
+                canv.itemconfig(screen1, text='')
+                t1.new_target()
+                t1.live = 1
         canv.update()
-        time.sleep(0.03)
+        time.sleep(z)
         g1.targetting()
         g1.power_up()
     canv.itemconfig(screen1, text='')
