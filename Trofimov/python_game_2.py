@@ -29,8 +29,9 @@ def new_ball():
     v_x = random.randint(-10, 10)
     v_y = random.randint(-10, 10)
     is_clicked = False
+    is_it_ball = random.choice((True, False))
     color = COLORS[random.randint(0, 5)]
-    parameters = [color, [x, y], r, v_x, v_y]
+    parameters = [color, [x, y], r, v_x, v_y, is_it_ball]
     pygame.draw.circle(screen, color, (x, y), r)
     return parameters
 
@@ -85,7 +86,7 @@ def draw_boss_on_the_screen(boss, time_indicate):
     screen.blit(boss[3], boss[0])
 
 
-def draw_ball(surf, color, cor, radius):
+def draw_ball(surf, color, cor, radius, is_ball):
     """
     This function draws a ball on current surface with current color, position and radius
     :surf: surface you want to draw ball on
@@ -94,8 +95,11 @@ def draw_ball(surf, color, cor, radius):
     :radius: radius of the ball
     return: nothing
     """
-    pygame.draw.circle(surf, color, cor, radius)
-
+    if is_ball:
+        pygame.draw.circle(surf, color, cor, radius)
+    else:
+        pygame.draw.rect(surf, color, (cor[0] - radius, cor[1] - radius,
+                                       2*radius, 2*radius))
 
 def draw_balls_on_the_screen(surf, list):
     """
@@ -112,7 +116,7 @@ def draw_balls_on_the_screen(surf, list):
             list[i][3] *= -1 # Reverse peed, if ball goes away in x direction
         if list[i][1][1] >= y_screen_size-51 or list[i][1][1] <= 51:
             list[i][4] *= -1 # # Reverse peed, if ball goes away in y direction
-        draw_ball(surf, list[i][0], list[i][1], list[i][2])
+        draw_ball(surf, list[i][0], list[i][1], list[i][2], list[i][5])
 
 
 def draw_score(score):
@@ -296,4 +300,3 @@ print(score, file=list_of_the_best_players)
 list_of_the_best_players.close()
 
 add_new_player()
-
