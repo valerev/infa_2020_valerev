@@ -85,7 +85,7 @@ class gun():
         self.f2_power = 10
         self.f2_on = 0
         self.an = 1
-        self.id = canv.create_line(20, 450, 50, 420, width=7) # FIXME: don't know how to set it...
+        self.id = canv.create_line(20, 450, 50, 420, width=7)
 
     def fire2_start(self, event):
         self.f2_on = 1
@@ -130,12 +130,15 @@ class gun():
 
 
 class target():
+    points = 0
+    id_points = canv.create_text(30, 30, text=points, font='28')
+
     def __init__(self):
-        self.points = 0
         self.live = 1
         self.id = canv.create_oval(0,0,0,0)
-        self.id_points = canv.create_text(30,30,text = self.points,font = '28')
         self.new_target()
+        self.vx = rnd(-100, 100, 1)
+        self.vy = rnd(-100, 100, 1)
 
     def new_target(self):
         """ Инициализация новой цели. """
@@ -149,11 +152,26 @@ class target():
     def hit(self, points=1):
         """Попадание шарика в цель."""
         canv.coords(self.id, -10, -10, -10, -10)
-        self.points += points
-        canv.itemconfig(self.id_points, text=self.points)
+        target.points += points
+        canv.itemconfig(target.id_points, text=target.points)
+
+    def move(self, dt):
+        if self.x >= 790 or self.x <= 10:
+            self.vx = -self.vx
+        if self.y >= 500 or self.y <= 10:
+            self.vy = -self.vy
+        self.x += self.vx * dt
+        self.y += self.vy * dt
+        canv.coords(self.id,
+                    self.x - self.r,
+                    self.y - self.r,
+                    self.x + self.r,
+                    self.y + self.r
+                    )
 
 
-t1 = target()
+number_of_targets = 3
+targets = [target() for i in range(number_of_targets)]
 screen1 = canv.create_text(400, 300, text='', font='28')
 g1 = gun()
 bullet = 0
@@ -162,7 +180,8 @@ balls = []
 
 def new_game(event=''):
     global gun, t1, screen1, balls, bullet
-    t1.new_target()
+    for t1 in targets:
+        t1.new_target()
     bullet = 0
     balls = []
     canv.bind('<Button-1>', g1.fire2_start)
@@ -173,29 +192,30 @@ def new_game(event=''):
 def mainloop():
     global bullet
     z = 0.03
-    t1.live = 1
-    while t1.live or balls:
-        for b in balls:
-            b.move(z)
-            b.set_coords()
-            if b.hittest(t1) and t1.live:
-                t1.live = 0
-                t1.hit()
-                canv.itemconfig(screen1, text='Вы уничтожили цель за ' + str(bullet) + ' выстрелов')
-                for i in range(25):
-                    for b in balls:
-                        b.move(z)
-                        b.set_coords()
-                    time.sleep(z)
-                    canv.update()
-                bullet = 0
-                canv.itemconfig(screen1, text='')
-                t1.new_target()
-                t1.live = 1
-            b.live -= z
-            if b.live <= 0 and b.vx <= 0.1:
-                balls.pop(0)
-                b.death()
+    while True:
+        for t1 in targets:
+            t1.move(z)
+            for b in balls:
+                b.move(z)
+                b.set_coords()
+                if b.hittest(t1) and t1.live:
+                    t1.live = 0
+                    t1.hit()
+                    canv.itemconfig(screen1, text='Вы уничтожили цель за ' + str(bullet) + ' выстрелов')
+                    for i in range(25):
+                        for b in balls:
+                            b.move(z)
+                            b.set_coords()
+                        time.sleep(z)
+                        canv.update()
+                    bullet = 0
+                    canv.itemconfig(screen1, text='')
+                    t1.new_target()
+                    t1.live = 1
+                b.live -= z
+                if b.live <= 0 and b.vx <= 0.1:
+                    balls.pop(0)
+                    b.death()
         canv.update()
         time.sleep(z)
         g1.targetting()
