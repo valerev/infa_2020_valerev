@@ -8,6 +8,7 @@ pygame.init()
 # Colors:
 Blue = (100, 100, 220)
 Gray = (100, 100, 100)
+Brown = (230, 140, 20)
 White = (225, 225, 225)
 L_green = (100, 200, 100)
 Green = (0, 210, 0)
@@ -15,20 +16,30 @@ Black = (0, 0, 0)
 Yellow = (225, 225, 0)
 Purple = (225, 0, 225)
 
+colors = [Blue,
+          L_green,
+          Green,
+          Yellow,
+          Purple,
+          ]
+
 def draw_bush(x, y, R):
     circle(screen, Green, (x,y), R)
-    #circle(screen, Black, (x,y), R, 1)
     n = random.randint(4, 6)
     s = R * 7 / 11
-    draw_flower(x, y, R/5)
+    color = random.choice(colors)
+    draw_flower(x, y, R/5, color)
     for i in range(n):
         phi = i * 2 * np.pi / n
         draw_flower(x + s*np.cos(phi),
                     y + s*np.sin(phi),
-                    R/4)
+                    R/4, color)
+
+def draw_sun(x, y, r):
+    circle(screen, Yellow, (x, y), r)
 
 
-def draw_flower(x, y, R):
+def draw_flower(x, y, R, color):
     ellipse(screen, Yellow, pygame.Rect(x-R, y-R/2, 2*R, R))
     ellipse(screen, Black, pygame.Rect(x-R, y-R/2, 2*R, R), 1)
     n=4
@@ -36,7 +47,7 @@ def draw_flower(x, y, R):
         for k in (-1, 1):
             for i in range(1, n):
                 phi = i*i*np.pi/(n*n)
-                ellipse(screen, White, pygame.Rect(x + j*R/np.sqrt(1 + 4*(np.tan(phi)**2)) - R/2 ,
+                ellipse(screen, color, pygame.Rect(x + j*R/np.sqrt(1 + 4*(np.tan(phi)**2)) - R/2 ,
                                                    y + k*R/np.sqrt(4 + 1/(np.tan(phi)**2)) - R/4,
                                                    R,
                                                    R/2))
@@ -111,6 +122,8 @@ screen = pygame.display.set_mode((xsize, ysize))
 
 screen.fill(Blue)
 
+draw_sun(xsize//10, ysize//10, 50)
+
 # Drawing a landscape
 
 Mountain_heels = []
@@ -119,6 +132,14 @@ for i in range(9):
 
 polygon(screen, Gray, Mountain_heels + [(xsize, ysize), (0, ysize)])
 lines(screen, Black, False, Mountain_heels, 1)
+
+Mountain_heels_1 = []
+for i in range(9):
+    Mountain_heels_1.append((i*xsize/8, random.randint(ysize//120, ysize//3)))
+
+polygon(screen, Brown, Mountain_heels_1 + [(xsize, ysize), (0, ysize)])
+lines(screen, Black, False, Mountain_heels_1, 1)
+
 
 # Drawing a grass
 
@@ -141,10 +162,10 @@ for t in range(3):
 for t in range(5):
     draw_lama(random.randint(0, xsize), random.randint(ysize / 2, ysize), random.randint(50, 200))
 
+
 pygame.display.update()
 clock = pygame.time.Clock()
 finished = False
-
 
 
 while not finished:

@@ -294,10 +294,24 @@ opening()
 game()
 
 file = open('results.txt', 'a')
+file.write(str(points) + ' ' + name + '\n')
+file.close() 
 
 ending()
 
-file.write(name + ' ' + str(points) + '\n')
+file = open('results.txt', 'r')
+lines = [line.rstrip('\n') for line in file]
+j = []
+for i in range(len(lines)):
+    l = lines[i].split()
+    l[0] = int(l[0])
+    j.append(l)
+    j.sort(reverse = True)
+file.close() 
+
+file = open('results.txt', 'w')
+for i in range(len(j)):
+    file.write(str(j[i][0]) + ' ' + j[i][1] + '\n')
 file.close()
 
 pygame.quit()
