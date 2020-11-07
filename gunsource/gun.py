@@ -51,17 +51,9 @@ class ball():
         self.x и self.y с учетом скоростей self.vx и self.vy, силы гравитации, действующей на мяч,
         и стен по краям окна (размер окна 800х600).
         """
-        g = 500
-        k = 0.8
-        if self.y >= 500:
-            self.y = 500
-            self.vy = -self.vy * k
-            self.vx = self.vx * k
-        if self.x >= 800:
-            self.vx = -self.vx
-        self.vy += g * dt
         self.x += self.vx * dt
         self.y += self.vy * dt
+
 
     def hittest(self, obj):
         """Функция проверяет сталкивалкивается ли данный обьект с целью, описываемой в обьекте obj.
@@ -79,6 +71,23 @@ class ball():
     def death(self):
         canv.delete(self.id)
 
+
+class Bullet(ball):
+    def change_speed(self, dt):
+        g = 500
+        k = 0.8
+        if self.y >= 500:
+            self.y = 500
+            self.vy = -self.vy * k
+            self.vx = self.vx * k
+        if self.x >= 800:
+            self.vx = -self.vx
+        self.vy += g * dt
+
+
+class Missile(ball):
+    def change_speed(self, dt):
+        pass
 
 class gun():
     def __init__(self):
@@ -98,7 +107,7 @@ class gun():
         """
         global balls, bullet
         bullet += 1
-        new_ball = ball()
+        new_ball = Bullet()
         new_ball.r += 5
         self.an = math.atan((event.y-new_ball.y) / (event.x-new_ball.x))
         new_ball.vx = 10 * self.f2_power * math.cos(self.an)
@@ -196,6 +205,7 @@ def mainloop():
         for t1 in targets:
             t1.move(z)
             for b in balls:
+                b.change_speed(z)
                 b.move(z)
                 b.set_coords()
                 if b.hittest(t1) and t1.live:
@@ -204,6 +214,7 @@ def mainloop():
                     canv.itemconfig(screen1, text='Вы уничтожили цель за ' + str(bullet) + ' выстрелов')
                     for i in range(25):
                         for b in balls:
+                            b.change_speed(z)
                             b.move(z)
                             b.set_coords()
                         time.sleep(z)
