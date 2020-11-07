@@ -26,13 +26,6 @@ class ball():
         self.vx = 10
         self.vy = 0
         self.color = choice(['blue', 'green', 'red', 'brown'])
-        self.id = canv.create_oval(
-                self.x - self.r,
-                self.y - self.r,
-                self.x + self.r,
-                self.y + self.r,
-                fill=self.color
-        )
         self.live = 8
 
     def set_coords(self):
@@ -73,23 +66,47 @@ class ball():
 
 
 class Bullet(ball):
+    g = 500
+    k = 0.8
+    def __init__(self):
+        ball.__init__(self)
+        self.id = canv.create_oval(
+            self.x - self.r,
+            self.y - self.r,
+            self.x + self.r,
+            self.y + self.r,
+            fill=self.color
+        )
+
     def change_speed(self, dt):
-        g = 500
-        k = 0.8
         if self.y >= 500:
             self.y = 500
-            self.vy = -self.vy * k
-            self.vx = self.vx * k
+            self.vy = -self.vy * Bullet.k
+            self.vx = self.vx * Bullet.k
         if self.x >= 800:
             self.vx = -self.vx
-        self.vy += g * dt
+        self.vy += Bullet.g * dt
 
 
 class Missile(ball):
+    def __init__(self):
+        ball.__init__(self)
+        self.id = canv.create_rectangle(
+            self.x - self.r,
+            self.y - self.r,
+            self.x + self.r,
+            self.y + self.r,
+            fill=self.color
+        )
+
     def change_speed(self, dt):
         pass
 
+
 class gun():
+    number_of_guns = 2
+    current_type_of_gun = 0
+
     def __init__(self):
         self.f2_power = 10
         self.f2_on = 0
@@ -107,7 +124,10 @@ class gun():
         """
         global balls, bullet
         bullet += 1
-        new_ball = Bullet()
+        if gun.current_type_of_gun == 0:
+            new_ball = Bullet()
+        if gun.current_type_of_gun == 1:
+            new_ball = Missile()
         new_ball.r += 5
         self.an = math.atan((event.y-new_ball.y) / (event.x-new_ball.x))
         new_ball.vx = 10 * self.f2_power * math.cos(self.an)
@@ -136,6 +156,10 @@ class gun():
             canv.itemconfig(self.id, fill='orange')
         else:
             canv.itemconfig(self.id, fill='black')
+
+    def change_type_of_gun(self, event):
+        gun.current_type_of_gun += 1
+        gun.current_type_of_gun %= gun.number_of_guns
 
 
 class target():
@@ -193,6 +217,7 @@ def new_game(event=''):
         t1.new_target()
     bullet = 0
     balls = []
+    canv.bind_all('<space>', g1.change_type_of_gun)
     canv.bind('<Button-1>', g1.fire2_start)
     canv.bind('<ButtonRelease-1>', g1.fire2_end)
     canv.bind('<Motion>', g1.targetting)
