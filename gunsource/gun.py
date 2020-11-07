@@ -25,7 +25,7 @@ class ball():
         self.r = 10
         self.vx = 10
         self.vy = 0
-        self.color = choice(['blue', 'green', 'red', 'brown'])
+        self.color = choice(['blue', 'green', 'brown'])
         self.live = 8
 
     def set_coords(self):
@@ -162,7 +162,7 @@ class gun():
         gun.current_type_of_gun %= gun.number_of_guns
 
 
-class target():
+class Target():
     points = 0
     id_points = canv.create_text(30, 30, text=points, font='28')
 
@@ -185,9 +185,11 @@ class target():
     def hit(self, points=1):
         """Попадание шарика в цель."""
         canv.coords(self.id, -10, -10, -10, -10)
-        target.points += points
-        canv.itemconfig(target.id_points, text=target.points)
+        Target.points += points
+        canv.itemconfig(Target.id_points, text=Target.points)
 
+
+class SlowTarget(Target):
     def move(self, dt):
         if self.x >= 790 or self.x <= 10:
             self.vx = -self.vx
@@ -202,9 +204,30 @@ class target():
                     self.y + self.r
                     )
 
+    def hit(self):
+        Target.hit(self, 1)
+
+class FastTarget(Target):
+    def move(self, dt):
+        if self.x >= 790 or self.x <= 10:
+            self.vx = -self.vx
+        if self.y >= 500 or self.y <= 10:
+            self.vy = -self.vy
+        self.x += self.vx * dt
+        self.y += self.vy * dt
+        canv.coords(self.id,
+                    self.x - self.r,
+                    self.y - self.r,
+                    self.x + self.r,
+                    self.y + self.r
+                    )
+
+    def hit(self):
+        Target.hit(self, 2)
+
 
 number_of_targets = 3
-targets = [target() for i in range(number_of_targets)]
+targets = [SlowTarget() for i in range(number_of_targets)]
 screen1 = canv.create_text(400, 300, text='', font='28')
 g1 = gun()
 bullet = 0
