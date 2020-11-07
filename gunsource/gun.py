@@ -170,17 +170,14 @@ class Target():
         self.live = 1
         self.id = canv.create_oval(0,0,0,0)
         self.new_target()
-        self.vx = rnd(-100, 100, 1)
-        self.vy = rnd(-100, 100, 1)
 
     def new_target(self):
         """ Инициализация новой цели. """
         x = self.x = rnd(600, 780)
         y = self.y = rnd(300, 450)
         r = self.r = rnd(2, 50)
-        color = self.color = 'red'
         canv.coords(self.id, x-r, y-r, x+r, y+r)
-        canv.itemconfig(self.id, fill=color)
+        canv.itemconfig(self.id, fill=self.color)
 
     def hit(self, points=1):
         """Попадание шарика в цель."""
@@ -190,6 +187,15 @@ class Target():
 
 
 class SlowTarget(Target):
+    def __init__(self):
+        Target.__init__(self)
+        self.vx = rnd(-100, 100, 1)
+        self.vy = rnd(-100, 100, 1)
+
+    def new_target(self):
+        color = self.color = 'red'
+        Target.new_target(self)
+
     def move(self, dt):
         if self.x >= 790 or self.x <= 10:
             self.vx = -self.vx
@@ -207,8 +213,27 @@ class SlowTarget(Target):
     def hit(self):
         Target.hit(self, 1)
 
+
 class FastTarget(Target):
+    free_run_time = 3
+
+    def __init__(self):
+        Target.__init__(self)
+        self.run_time = 0
+        self.vx = rnd(-300, 300, 10)
+        self.vy = rnd(-300, 300, 10)
+
+
+    def new_target(self):
+        color = self.color = 'yellow'
+        Target.new_target(self)
+
     def move(self, dt):
+        if self.run_time >= FastTarget.free_run_time:
+            self.vx = rnd(-300, 300, 10)
+            self.vy = rnd(-300, 300, 10)
+            self.run_time = 0
+
         if self.x >= 790 or self.x <= 10:
             self.vx = -self.vx
         if self.y >= 500 or self.y <= 10:
@@ -221,13 +246,14 @@ class FastTarget(Target):
                     self.x + self.r,
                     self.y + self.r
                     )
+        self.run_time += dt
 
     def hit(self):
         Target.hit(self, 2)
 
 
 number_of_targets = 3
-targets = [SlowTarget() for i in range(number_of_targets)]
+targets = [eval(choice(['FastTarget()', 'SlowTarget()'])) for i in range(number_of_targets)]
 screen1 = canv.create_text(400, 300, text='', font='28')
 g1 = gun()
 bullet = 0
