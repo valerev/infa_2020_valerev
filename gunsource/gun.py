@@ -111,7 +111,7 @@ class Tank:
     def __init__(self):
         self.color = 'black'
         self.x = 20
-        self.y = 450
+        self.y = 480
         self.vx = 2
         self.tank_id = canv.create_rectangle(self.x - Tank.width/2.0,
                                              self.y,
@@ -122,15 +122,13 @@ class Tank:
 
     def move_left(self, event):
         self.x -= self.vx
-        canv.coords(self.tank_id,
-                    self.x - Tank.width/2.0,
-                    self.y,
-                    self.x + Tank.width/2.0,
-                    self.y + Tank.height,
-                    )
+        self.draw()
 
     def move_right(self, event):
         self.x += self.vx
+        self.draw()
+
+    def draw(self):
         canv.coords(self.tank_id,
                     self.x - Tank.width / 2.0,
                     self.y,
@@ -138,6 +136,12 @@ class Tank:
                     self.y + Tank.height,
                     )
 
+        canv.coords(self.id,
+                    self.x,
+                    self.y,
+                    50,
+                    420
+                    )
 
 class gun(Tank):
     number_of_guns = 2
@@ -148,6 +152,8 @@ class gun(Tank):
         self.f2_on = 0
         self.an = 1
         Tank.__init__(self)
+        self.length = 1
+        self.point = [1, 0]
         self.id = canv.create_line(self.x, self.y, 50, 420, width=7)
 
     def fire2_start(self, event):
@@ -166,9 +172,8 @@ class gun(Tank):
         if gun.current_type_of_gun == 1:
             new_ball = Missile(self.x, self.y)
         new_ball.r += 5
-        self.an = math.atan((event.y-new_ball.y) / (event.x-new_ball.x))
-        new_ball.vx = 10 * self.f2_power * math.cos(self.an)
-        new_ball.vy = 10 * self.f2_power * math.sin(self.an)
+        new_ball.vx = 10 * self.f2_power * self.point[0]
+        new_ball.vy = 10 * self.f2_power * self.point[1]
         balls += [new_ball]
         self.f2_on = 0
         self.f2_power = 10
@@ -176,14 +181,16 @@ class gun(Tank):
     def targetting(self, event=0):
         """Прицеливание. Зависит от положения мыши."""
         if event:
-            self.an = math.atan((event.y-self.y) / (event.x-self.x))
+            self.length = math.sqrt((event.x-self.x)**2 + (event.y-self.y)**2)
+            self.point = [(event.x-self.x)/self.length,
+                          (event.y-self.y)/self.length]
         if self.f2_on:
             canv.itemconfig(self.id, fill='orange')
         else:
             canv.itemconfig(self.id, fill='black')
         canv.coords(self.id, self.x, self.y,
-                    self.x + max(self.f2_power, 20) * math.cos(self.an),
-                    self.y + max(self.f2_power, 20) * math.sin(self.an)
+                    self.x + max(self.f2_power, 20) * self.point[0],
+                    self.y + max(self.f2_power, 20) * self.point[1]
                     )
 
     def power_up(self):
@@ -307,8 +314,8 @@ def new_game(event=''):
     canv.bind('<Button-1>', g1.fire2_start)
     canv.bind('<ButtonRelease-1>', g1.fire2_end)
     canv.bind('<Motion>', g1.targetting)
-    canv.bind_all('a', g1.move_left)
-    canv.bind_all('d', g1.move_right)
+    canv.bind_all('<KeyPress-a>', g1.move_left)
+    canv.bind_all('<KeyPress-d>', g1.move_right)
 
 def mainloop():
     global bullet
