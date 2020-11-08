@@ -113,6 +113,7 @@ class Tank:
         self.x = 20
         self.y = 480
         self.vx = 2
+        self.lives = 100
         self.tank_id = canv.create_rectangle(self.x - Tank.width/2.0,
                                              self.y,
                                              self.x + Tank.width/2.0,
@@ -142,6 +143,7 @@ class Tank:
                     50,
                     420
                     )
+
 
 class gun(Tank):
     number_of_guns = 2
@@ -205,6 +207,35 @@ class gun(Tank):
         gun.current_type_of_gun += 1
         gun.current_type_of_gun %= gun.number_of_guns
 
+
+class Bomb:
+    g = 500
+    r = 3
+
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.vy = 0
+        self.id = canv.create_oval(self.x-Bomb.r,
+                                   self.y-Bomb.r,
+                                   self.x+Bomb.r,
+                                   self.y+Bomb.r,
+                                   fill='grey')
+
+    def move(self, z):
+        self.vy += Bomb.g * z
+        self.y += self.vy*z
+        if self.y > 600:
+            self.destroy()
+        canv.coords(self.id,
+                    self.x - Bomb.r,
+                    self.y - Bomb.r,
+                    self.x + Bomb.r,
+                    self.y + Bomb.r,
+                    )
+
+    def destroy(self):
+        canv.delete(self.id)
 
 class Target():
     points = 0
@@ -320,7 +351,11 @@ def new_game(event=''):
 def mainloop():
     global bullet
     z = 0.03
+    Bombs = []
+    Bombs.append(Bomb(50, 50))
     while True:
+        for bomb in Bombs:
+            bomb.move(z)
         for t1 in targets:
             t1.move(z)
             for b in balls:
