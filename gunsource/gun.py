@@ -237,7 +237,9 @@ class Bomb:
     def destroy(self):
         canv.delete(self.id)
 
+
 class Target():
+    Bombs = []
     points = 0
     id_points = canv.create_text(30, 30, text=points, font='28')
 
@@ -266,6 +268,7 @@ class SlowTarget(Target):
         Target.__init__(self)
         self.vx = rnd(-100, 100, 1)
         self.vy = rnd(-100, 100, 1)
+        self.time_to_throw = 0
 
     def new_target(self):
         color = self.color = 'red'
@@ -287,6 +290,12 @@ class SlowTarget(Target):
 
     def hit(self):
         Target.hit(self, 1)
+
+    def throw_bomb(self, tank, dt):
+        self.time_to_throw += dt
+        if abs(self.x - tank.x) < 5 and self.time_to_throw > 2:
+            Target.Bombs.append(Bomb(self.x, self.y))
+            self.time_to_throw = 0
 
 
 class FastTarget(Target):
@@ -326,6 +335,8 @@ class FastTarget(Target):
     def hit(self):
         Target.hit(self, 2)
 
+    def throw_bomb(self, tank, dt):
+        pass
 
 number_of_targets = 3
 targets = [eval(choice(['FastTarget()', 'SlowTarget()'])) for i in range(number_of_targets)]
@@ -351,12 +362,11 @@ def new_game(event=''):
 def mainloop():
     global bullet
     z = 0.03
-    Bombs = []
-    Bombs.append(Bomb(50, 50))
     while True:
-        for bomb in Bombs:
+        for bomb in Target.Bombs:
             bomb.move(z)
         for t1 in targets:
+            t1.throw_bomb(g1, z)
             t1.move(z)
             for b in balls:
                 b.change_speed(z)
