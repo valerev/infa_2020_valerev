@@ -104,6 +104,15 @@ class Missile(ball):
         pass
 
 
+class MobBullet(Bullet):
+    def hit(self, player):
+        if abs(self.x - player.x) < player.width/2 + self.r and \
+                abs(self.y - player.y) < player.height/2 + self.r:
+            canv.itemconfig(player.id_lives, text='Lives: ' + str(player.lives))
+            mob_balls.remove(self)
+            player.lives -= 1
+            self.death()
+
 class gun:
     number_of_guns = 2
     current_type_of_gun = 0
@@ -112,15 +121,10 @@ class gun:
         self.f2_power = 10
         self.f2_on = 0
         self.an = 1
-        # Tank.__init__(self)
         self.length = 1
         self.point = [1, 0]
-        self.id = canv.create_line(self.x, self.y, 50, 420, width=7)
-        self.number_of_missiles = 5
-        self.id_number_of_missiles = canv.create_text(200, 30,
-                                                      text='Missiles left: ' +
-                                                           str(self.number_of_missiles),
-                                                      font='28')
+        self.id = canv.create_line(self.x, self.y,
+                                   self.x + self.point[0]*20, self.y + self.point[1]*20, width=7)
 
     def fire2_start(self, event):
         self.f2_on = 1
@@ -186,12 +190,12 @@ class Tank(gun):
     width = 40
     height = 20
 
-    def __init__(self):
+    def __init__(self, x=20, y=480):
         self.color = 'black'
-        self.x = 20
-        self.y = 480
+        self.x = x
+        self.y = y
         self.vx = 2
-        self.lives = 2
+        self.lives = 10
         self.tank_id = canv.create_rectangle(self.x - Tank.width/2.0,
                                              self.y,
                                              self.x + Tank.width/2.0,
@@ -199,6 +203,11 @@ class Tank(gun):
                                              fill=self.color
                                              )
         self.id_lives = canv.create_text(500, 30, text='Lives: ' + str(self.lives), font='28')
+        self.number_of_missiles = 5
+        self.id_number_of_missiles = canv.create_text(200, 30,
+                                                      text='Missiles left: ' +
+                                                           str(self.number_of_missiles),
+                                                      font='28')
         gun.__init__(self)
 
     def move_left(self, event):
@@ -226,14 +235,15 @@ class Tank(gun):
 
 
 class MobTank(Tank):
-    distance = 30
+    distance = 150
 
-    def __init__(self):
+    def __init__(self, x, y):
         self.color = 'black'
-        self.x = 20
-        self.y = 480
+        self.x = x
+        self.y = y
         self.vx = 2
         self.lives = 2
+        self.fire_time = 0
         self.tank_id = canv.create_rectangle(self.x - Tank.width / 2.0,
                                              self.y,
                                              self.x + Tank.width / 2.0,
@@ -242,8 +252,33 @@ class MobTank(Tank):
                                              )
         gun.__init__(self)
 
-    def move(self):
-        pass
+    def move_mob(self, player):
+        if self.x >= player.x:
+            if self.x - player.x <= MobTank.distance:
+                self.move_right(0)
+            elif self.x - player.x >= 2*MobTank.distance:
+                self.move_left(0)
+        else:
+            if player.x - self.x <= MobTank.distance:
+                self.move_left(0)
+            elif player.x - self.x >= 2*MobTank.distance:
+                self.move_right(0)
+
+    def mob_targeting(self, player):
+        if self.fire_time < 4.5:
+            return None
+        angle = rnd(2, 88, 1)
+        if self.x > player.x:
+            self.point = [math.cos(angle), -math.sin(angle)]
+        else:
+            self.point = [-math.cos(angle), -math.sin(angle)]
+
+    def mob_fire(self):
+        global mob_balls
+        new_ball = MobBullet(self.x, self.y)
+        mob_balls.append(new_ball)
+        new_ball.vx = 300 * self.point[0]
+        new_ball.vy = 300 * self.point[1]
 
 
 class Bomb:
@@ -385,13 +420,14 @@ class FastTarget(Target):
 
 
 number_of_targets = 3
-number_of_mobs = 0
+number_of_mobs = 1
 targets = [eval(choice(['FastTarget()', 'SlowTarget()'])) for i in range(number_of_targets)]
 screen1 = canv.create_text(400, 300, text='', font='28')
-mobs = [MobTank() for i in range(number_of_targets)]
+mobs = [MobTank(480, 480) for i in range(number_of_mobs)]
 g1 = Tank()
 bullet = 0
 balls = []
+mob_balls = []
 
 
 
@@ -415,6 +451,18 @@ def mainloop():
     while True:
         if g1.lives <= 0:
             return None
+        for mob in mobs:
+            mob.move_mob(g1)
+            mob.mob_targeting(g1)
+            mob.fire_time += z
+            if mob.fire_time >= 5:
+                mob.mob_fire()
+                mob.fire_time = 0
+        for mob_ball in mob_balls:
+            mob_ball.change_speed(z)
+            mob_ball.move(z)
+            mob_ball.set_coords()
+            mob_ball.hit(g1)
         if Target.points >= 5*len(targets):
             targets.append(eval(choice(['FastTarget()', 'SlowTarget()'])))
             targets[-1].new_target()
@@ -461,3 +509,5 @@ def mainloop():
 new_game()
 
 mainloop()
+
+print(Target.points)
