@@ -267,7 +267,7 @@ class MobTank(Tank):
     def mob_targeting(self, player):
         if self.fire_time < 4.5:
             return None
-        angle = rnd(2, 88, 1)
+        angle = rnd(30, 88, 1)
         if self.x > player.x:
             self.point = [math.cos(angle), -math.sin(angle)]
         else:
