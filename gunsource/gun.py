@@ -13,7 +13,7 @@ canv.pack(fill=tk.BOTH, expand=1)
 
 
 class ball():
-    def __init__(self, x=40, y=450):
+    def __init__(self, x, y):
         """ Конструктор класса ball
 
         Args:
@@ -23,7 +23,7 @@ class ball():
         self.x = x
         self.y = y
         self.r = 10
-        self.vx = 10
+        self.vx = 0
         self.vy = 0
         self.color = choice(['blue', 'green', 'brown'])
         self.live = 8
@@ -68,8 +68,9 @@ class ball():
 class Bullet(ball):
     g = 500
     k = 0.8
-    def __init__(self):
-        ball.__init__(self)
+
+    def __init__(self, x, y):
+        ball.__init__(self, x, y)
         self.id = canv.create_oval(
             self.x - self.r,
             self.y - self.r,
@@ -89,8 +90,8 @@ class Bullet(ball):
 
 
 class Missile(ball):
-    def __init__(self):
-        ball.__init__(self)
+    def __init__(self, x, y):
+        ball.__init__(self, x, y)
         self.id = canv.create_rectangle(
             self.x - self.r,
             self.y - self.r,
@@ -103,7 +104,42 @@ class Missile(ball):
         pass
 
 
-class gun():
+class Tank:
+    width = 40
+    height = 20
+
+    def __init__(self):
+        self.color = 'black'
+        self.x = 20
+        self.y = 450
+        self.vx = 2
+        self.tank_id = canv.create_rectangle(self.x - Tank.width/2.0,
+                                             self.y,
+                                             self.x + Tank.width/2.0,
+                                             self.y + Tank.height,
+                                             fill=self.color
+                                             )
+
+    def move_left(self, event):
+        self.x -= self.vx
+        canv.coords(self.tank_id,
+                    self.x - Tank.width/2.0,
+                    self.y,
+                    self.x + Tank.width/2.0,
+                    self.y + Tank.height,
+                    )
+
+    def move_right(self, event):
+        self.x += self.vx
+        canv.coords(self.tank_id,
+                    self.x - Tank.width / 2.0,
+                    self.y,
+                    self.x + Tank.width / 2.0,
+                    self.y + Tank.height,
+                    )
+
+
+class gun(Tank):
     number_of_guns = 2
     current_type_of_gun = 0
 
@@ -111,7 +147,8 @@ class gun():
         self.f2_power = 10
         self.f2_on = 0
         self.an = 1
-        self.id = canv.create_line(20, 450, 50, 420, width=7)
+        Tank.__init__(self)
+        self.id = canv.create_line(self.x, self.y, 50, 420, width=7)
 
     def fire2_start(self, event):
         self.f2_on = 1
@@ -125,9 +162,9 @@ class gun():
         global balls, bullet
         bullet += 1
         if gun.current_type_of_gun == 0:
-            new_ball = Bullet()
+            new_ball = Bullet(self.x, self.y)
         if gun.current_type_of_gun == 1:
-            new_ball = Missile()
+            new_ball = Missile(self.x, self.y)
         new_ball.r += 5
         self.an = math.atan((event.y-new_ball.y) / (event.x-new_ball.x))
         new_ball.vx = 10 * self.f2_power * math.cos(self.an)
@@ -139,14 +176,14 @@ class gun():
     def targetting(self, event=0):
         """Прицеливание. Зависит от положения мыши."""
         if event:
-            self.an = math.atan((event.y-450) / (event.x-20))
+            self.an = math.atan((event.y-self.y) / (event.x-self.x))
         if self.f2_on:
             canv.itemconfig(self.id, fill='orange')
         else:
             canv.itemconfig(self.id, fill='black')
-        canv.coords(self.id, 20, 450,
-                    20 + max(self.f2_power, 20) * math.cos(self.an),
-                    450 + max(self.f2_power, 20) * math.sin(self.an)
+        canv.coords(self.id, self.x, self.y,
+                    self.x + max(self.f2_power, 20) * math.cos(self.an),
+                    self.y + max(self.f2_power, 20) * math.sin(self.an)
                     )
 
     def power_up(self):
@@ -270,7 +307,8 @@ def new_game(event=''):
     canv.bind('<Button-1>', g1.fire2_start)
     canv.bind('<ButtonRelease-1>', g1.fire2_end)
     canv.bind('<Motion>', g1.targetting)
-
+    canv.bind_all('a', g1.move_left)
+    canv.bind_all('d', g1.move_right)
 
 def mainloop():
     global bullet
